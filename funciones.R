@@ -3,32 +3,35 @@ siedu_cargar <- function(ruta, hoja) {
 }
 
 siedu_limpiar <- function(data, año = 1990) {
-  # data <- siedu_2022
-  # año <- 2022
+  # data <- siedu_2018
+  # año <- 2018
   
   # metadatos presentes en las primeras filas de las tablas
   # que contienen el id de cada indicador, el estándar CNDT, y la medida en que viene la variable
   suppressWarnings({
     metadatos_0 <- data |>
       row_to_names(10) |> 
+      remove_empty("cols") |> 
+      # clean_names() |> 
       select(-1:-6)
   })
   
   metadatos_1 <- metadatos_0 |> 
     slice(1:3) |> 
-    pivot_longer(cols = starts_with("BPU_") | starts_with("DE_") | starts_with("EA_") | starts_with("IS_") | starts_with("IP_") | starts_with("IG_"),
+    pivot_longer(cols = c(everything(), -1), #starts_with("BPU_") | starts_with("DE_") | starts_with("EA_") | starts_with("IS_") | starts_with("IP_") | starts_with("IG_"),
                  names_to = "id", values_to = "valor") |> 
     rename(tipo = 1) |> 
     mutate(tipo = recode(tipo, "CUT" = "ETIQUETA"))
   
   # separar las columnas en objetos
   estandar <- metadatos_1 |> filter(str_detect(tipo, "EST.*CNDT"))
-  id_indicador <- metadatos_1 |> filter(str_detect(tipo, "ETIQUETA"))
+  id_indicadores <- metadatos_1 |> filter(str_detect(tipo, "ETIQUETA"))
   medida <- metadatos_1 |> filter(str_detect(tipo, "MEDI"))
   
   # extraer tabla de datos
   siedu <- data |>
     row_to_names(13) |> 
+    remove_empty("cols") |> 
     select(-c(1:5)) |>
     rename(comuna = Comuna,
            cut_comuna = CUT)
@@ -54,7 +57,7 @@ siedu_limpiar <- function(data, año = 1990) {
   
   # agregar columna de id de variables
   siedu_5 <- siedu_4 |> 
-    left_join(id_indicador |> select(-tipo), 
+    left_join(id_indicadores |> select(-tipo), 
               by = join_by(variable == valor)) |> 
     relocate(id, .before = variable)
   

@@ -7,7 +7,8 @@ library(janitor)
 source("funciones.R")
   
 # el archivo funciona con macros, pero internamente son hojas
-matriz_siedu = "datos/datos_originales/matriz-siedu-publicacion.xlsm"
+# matriz_siedu = "datos/datos_originales/matriz-siedu-publicacion.xlsm"
+matriz_siedu = "datos/datos_originales/matriz-siedu-publicacion_2025-03-17.xlsm"
 
 # cargar todos los datos, un objeto por hoja
 siedu_2018 <- siedu_cargar(matriz_siedu, 2)
@@ -37,7 +38,8 @@ siedu_2 <- siedu |>
   slice_max(año) |> 
   ungroup()
 
-
 # guardar ----
 readr::write_csv2(siedu_2, "datos/siedu_indicadores_desarrollo_urbano.csv")
 arrow::write_parquet(siedu_2, "datos/siedu_indicadores_desarrollo_urbano.parquet")
+
+# siedu_2 <- readr::read_csv2("datos/siedu_indicadores_desarrollo_urbano.csv")
