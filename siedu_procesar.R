@@ -36,7 +36,9 @@ siedu_2 <- siedu |>
   arrange(comuna, variable, desc(año)) |> 
   group_by(comuna, variable) |> 
   slice_max(año) |> 
-  ungroup()
+  ungroup() |> 
+  relocate(año, .before = variable) |> 
+  rename(valor = cifra)
 
 # guardar ----
 readr::write_csv2(siedu_2, "datos/siedu_indicadores_desarrollo_urbano.csv")
